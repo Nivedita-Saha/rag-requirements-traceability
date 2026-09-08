@@ -44,18 +44,23 @@ Notably, naive semantic retrieval *underperforms* the lexical baseline, and
 single-shot RAG recovers but does not beat it — only the agentic design clears
 it. Full analysis, figures and limitations are in [RESULTS.md](RESULTS.md).
 
+![Performance across the method pipeline](results/slope.png)
+
+![Method comparison across metrics](results/comparison.png)
+
 ## Project structure
 
+```
 src/
-dataset.py Parse the iTrust dataset (requirements, code, gold links)
-baseline.py TF-IDF baseline + shared evaluation metrics
-semantic.py Embedding retrieval with Ollama + ChromaDB
-rag_verify.py RAG + LLM candidate verification
-agentic.py Agentic verifier with context-gathering actions
-analyse.py Comparison table and figures
-results/ Metrics (JSON) and figures (PNG)
-RESULTS.md Full write-up: methods, results, error analysis, limitations
-
+  dataset.py      Parse the iTrust dataset (requirements, code, gold links)
+  baseline.py     TF-IDF baseline + shared evaluation metrics
+  semantic.py     Embedding retrieval with Ollama + ChromaDB
+  rag_verify.py   RAG + LLM candidate verification
+  agentic.py      Agentic verifier with context-gathering actions
+  analyse.py      Comparison table and figures
+results/          Metrics (JSON) and figures (PNG)
+RESULTS.md        Full write-up: methods, results, error analysis, limitations
+```
 
 ## Requirements
 
