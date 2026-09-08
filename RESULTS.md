@@ -96,6 +96,41 @@ That RAG could not beat the baseline while the agentic layer could indicates the
 gain comes from the agent's context-gathering design, not merely from adding an
 LLM to the pipeline.
 
+## Error Analysis
+
+Inspection of individual requirements during development surfaced three
+recurring failure modes, which together explain much of the gap between the
+methods and the gold standard.
+
+**Indirect (transitive) links.** Many gold links connect a requirement not to a
+single obvious class but to a chain of collaborating classes. For requirement
+UC1S1 ("add a patient"), the gold links include `AddPatientAction`, `PatientDAO`,
+`AuthDAO` and `TransactionDAO`. Only the first is evident from surface reading;
+the data-access and transaction-logging classes are reached only because the
+action class *calls* them. Flat retrieval (TF-IDF and semantic) cannot see this
+structure and misses the dependent classes. The agentic layer's expansion action
+is what recovers them, and this case is representative of why it improves recall.
+
+**Same-domain distractors.** The most common false positive is a class that
+shares vocabulary and feature area with the requirement but does not implement
+it. For UC1S1, classes such as `PatientBaseAction` and `EditPatientAction` rank
+highly under every method because they concern patients, yet they are not the
+gold implementation. Lexical and embedding similarity both reward this surface
+overlap, and even the LLM verifier frequently accepts such classes, which caps
+precision.
+
+**Verifier instability on hard judgements.** For genuinely ambiguous pairs the
+local LLM was not self-consistent. On the UC1S1–`AuthDAO` pair, the model's
+chain-of-thought reasoning and its final verdict sometimes disagreed, and small
+changes to the prompt flipped the decision. This instability is a property of
+the small model rather than of any single method, and it bounds how far verdict
+quality can be pushed by prompting alone.
+
+A further structural factor is the metric behaviour itself: because most
+requirements have only two or three gold links, precision@10 is capped well below
+1.0 even for a perfect ranker, so MAP — which is insensitive to this cut-off — is
+the more informative comparison across methods.
+
 ## Limitations
 
 - **Small local model.** Verification uses a 3-billion-parameter model running
