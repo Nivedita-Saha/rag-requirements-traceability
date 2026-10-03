@@ -6,6 +6,9 @@ import re
 
 import ollama
 
+import json
+from pathlib import Path
+
 from src.dataset import Dataset, load_itrust
 
 LLM_MODEL = "llama3.2:3b"
@@ -250,5 +253,19 @@ if __name__ == "__main__":
     for key, value in metrics.items():
         print(f"  {key}: {value:.4f}" if isinstance(value, float) else f"  {key}: {value}")
 
+    # Cache the full per-requirement rankings so downstream work (the
+    # knowledge-graph traces_to edges) can reuse them without re-running
+    # this slow method. JSON-friendly: {req_id: [[code_id, score], ...]}.
+    rankings_out = {
+        req_id: [[code_id, score] for code_id, score in ranked]
+        for req_id, ranked in rankings.items()
+    }
+    Path("results/agentic_rankings.json").parent.mkdir(parents=True, exist_ok=True)
+    with open("results/agentic_rankings.json", "w", encoding="utf-8") as f:
+        json.dump(rankings_out, f, indent=2)
+    print("Saved rankings to results/agentic_rankings.json")
+
     _save_results(metrics, "results/agentic.json")
     print("\nSaved to results/agentic.json")
+
+    
